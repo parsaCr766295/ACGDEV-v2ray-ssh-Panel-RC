@@ -28,13 +28,26 @@ if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com -o get-docker.sh
     sh get-docker.sh
     rm get-docker.sh
+    
+    # Ensure Docker is started and enabled
+    systemctl start docker
+    systemctl enable docker
 else
     echo "[+] Docker is already installed."
 fi
 
+# Verify Docker Installation
+if ! command -v docker &> /dev/null; then
+    echo "[-] Error: Docker installation failed. Please install Docker manually."
+    exit 1
+fi
+
 # Install Docker Compose
 echo "[+] Checking Docker Compose..."
-docker compose version || apt-get install -y docker-compose-plugin
+if ! docker compose version &> /dev/null; then
+    echo "[+] Installing Docker Compose Plugin..."
+    apt-get install -y docker-compose-plugin
+fi
 
 # Setup Directory & Clone Repo
 INSTALL_DIR="/opt/rocket-panel"
