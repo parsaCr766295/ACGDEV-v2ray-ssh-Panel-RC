@@ -45,7 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/parsaCr766295/ACGDEV-v2ray-ssh-Pane
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/ACGDEV-v2ray-ssh-Panel-RC/ACGDEV-v2ray-ssh-Panel-RC.git
+   git clone https://github.com/parsaCr766295/ACGDEV-v2ray-ssh-Panel-RC.git
    cd ACGDEV-v2ray-ssh-Panel-RC
    ```
 
