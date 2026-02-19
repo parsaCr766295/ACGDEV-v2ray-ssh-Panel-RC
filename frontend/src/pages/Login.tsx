@@ -27,7 +27,17 @@ const Login = () => {
       login(response.data.access_token);
       navigate('/');
     } catch (err: any) {
-      setError('نام کاربری یا رمز عبور اشتباه است');
+      console.error(err);
+      if (err.response) {
+        // Server responded with a status code outside of 2xx
+        setError(err.response.data.detail || 'نام کاربری یا رمز عبور اشتباه است');
+      } else if (err.request) {
+        // Request was made but no response was received
+        setError('خطا در برقراری ارتباط با سرور. لطفا اتصال اینترنت خود را بررسی کنید.');
+      } else {
+        // Something happened in setting up the request
+        setError('خطای ناشناخته رخ داد.');
+      }
     }
   };
 
