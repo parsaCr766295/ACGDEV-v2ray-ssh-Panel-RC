@@ -38,7 +38,7 @@
 Run the following command on your **Ubuntu 20.04+** server:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ACGDEV-v2ray-ssh-Panel-RC/main/scripts/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/parsaCr766295/ACGDEV-v2ray-ssh-Panel-RC/main/scripts/install.sh | sudo bash
 ```
 
 ### Manual Installation (Docker)
