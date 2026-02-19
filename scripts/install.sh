@@ -25,10 +25,20 @@ fi
 
 if ! command -v docker &> /dev/null; then
     echo "[+] Installing Docker..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
-    rm get-docker.sh
     
+    # Try official script first
+    if curl -fsSL https://get.docker.com -o get-docker.sh; then
+        sh get-docker.sh
+        rm get-docker.sh
+    fi
+    
+    # Fallback to apt if docker is still not found
+    if ! command -v docker &> /dev/null; then
+        echo "[!] Standard installer failed. Trying apt..."
+        apt-get update
+        apt-get install -y docker.io
+    fi
+
     # Ensure Docker is started and enabled
     systemctl start docker
     systemctl enable docker
@@ -38,7 +48,8 @@ fi
 
 # Verify Docker Installation
 if ! command -v docker &> /dev/null; then
-    echo "[-] Error: Docker installation failed. Please install Docker manually."
+    echo "[-] Error: Docker installation failed. Please install Docker manually:"
+    echo "    apt install docker.io"
     exit 1
 fi
 
@@ -46,7 +57,7 @@ fi
 echo "[+] Checking Docker Compose..."
 if ! docker compose version &> /dev/null; then
     echo "[+] Installing Docker Compose Plugin..."
-    apt-get install -y docker-compose-plugin
+    apt-get install -y docker-compose-plugin || apt-get install -y docker-compose
 fi
 
 # Setup Directory & Clone Repo
