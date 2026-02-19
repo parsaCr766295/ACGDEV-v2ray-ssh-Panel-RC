@@ -17,28 +17,17 @@ fi
 echo "[+] Updating System..."
 apt-get update -y && apt-get upgrade -y
 
-# Install Git and Docker if not exists
-if ! command -v git &> /dev/null; then
-    echo "[+] Installing Git..."
-    apt-get install -y git
-fi
+# Install Basic Dependencies
+echo "[+] Installing Dependencies..."
+apt-get install -y git curl wget
 
+# Install Docker if not exists
 if ! command -v docker &> /dev/null; then
-    echo "[+] Installing Docker..."
+    echo "[+] Installing Docker using convenience script..."
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+    rm get-docker.sh
     
-    # Try official script first
-    if curl -fsSL https://get.docker.com -o get-docker.sh; then
-        sh get-docker.sh
-        rm get-docker.sh
-    fi
-    
-    # Fallback to apt if docker is still not found
-    if ! command -v docker &> /dev/null; then
-        echo "[!] Standard installer failed. Trying apt..."
-        apt-get update
-        apt-get install -y docker.io
-    fi
-
     # Ensure Docker is started and enabled
     systemctl start docker
     systemctl enable docker
@@ -46,18 +35,27 @@ else
     echo "[+] Docker is already installed."
 fi
 
-# Verify Docker Installation
+# Verify Docker Installation & Fallback
 if ! command -v docker &> /dev/null; then
-    echo "[-] Error: Docker installation failed. Please install Docker manually:"
-    echo "    apt install docker.io"
+    echo "[-] Convenience script failed. Trying apt installation (fallback)..."
+    apt-get update
+    apt-get install -y docker.io docker-compose-plugin
+    
+    # Start service
+    systemctl start docker
+    systemctl enable docker
+fi
+
+# Final Check
+if ! command -v docker &> /dev/null; then
+    echo "[-] Error: Docker installation failed completely. Please install Docker manually."
     exit 1
 fi
 
-# Install Docker Compose
-echo "[+] Checking Docker Compose..."
+# Install Docker Compose Plugin if missing (for 'docker compose' command)
 if ! docker compose version &> /dev/null; then
     echo "[+] Installing Docker Compose Plugin..."
-    apt-get install -y docker-compose-plugin || apt-get install -y docker-compose
+    apt-get install -y docker-compose-plugin
 fi
 
 # Setup Directory & Clone Repo
