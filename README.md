@@ -38,7 +38,16 @@
 Run the following command on your **Ubuntu 20.04+** server:
 
 ```bash
+sudo apt update && sudo apt install -y curl
 curl -fsSL https://raw.githubusercontent.com/parsaCr766295/ACGDEV-v2ray-ssh-Panel-RC/main/scripts/install.sh | sudo bash
+```
+
+### 🔄 Updating
+To update the panel to the latest version, run:
+
+```bash
+cd /opt/rocket-panel
+sudo bash scripts/update.sh
 ```
 
 ### Manual Installation (Docker)
@@ -51,7 +60,7 @@ curl -fsSL https://raw.githubusercontent.com/parsaCr766295/ACGDEV-v2ray-ssh-Pane
 
 2. **Start services:**
    ```bash
-   docker compose up -d --build
+   docker compose -f docker-compose.yml up -d --build
    ```
 
 3. **Access the panel:**
