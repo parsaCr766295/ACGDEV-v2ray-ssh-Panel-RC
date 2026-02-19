@@ -82,7 +82,9 @@ fi
 
 # Start Services
 echo "[+] Starting Services..."
-docker compose up -d --build
+cd $INSTALL_DIR
+echo "[+] Running docker compose in $(pwd)..."
+docker compose -f docker-compose.yml up -d --build
 
 echo "=================================================="
 echo "   Installation Complete!"
