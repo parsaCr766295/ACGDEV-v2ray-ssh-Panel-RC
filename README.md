@@ -1,7 +1,7 @@
 # Rocket Panel 2026 (ACGDEV Edition) 🚀
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-2026.1.0-green.svg)
+![Version](https://img.shields.io/badge/version-2026.1.1-green.svg)
 ![Status](https://img.shields.io/badge/status-Stable-success.svg)
 
 **Rocket Panel 2026** is a next-generation management panel for V2Ray and SSH services, built with modern technologies to provide speed, security, and scalability. Designed to be a superior alternative to existing panels like X-UI or Rocket SSH.
