@@ -63,6 +63,14 @@ else
     cd $INSTALL_DIR
 fi
 
+# Verify docker-compose.yml exists
+if [ ! -f "docker-compose.yml" ]; then
+    echo "[-] Error: docker-compose.yml not found in $(pwd)"
+    echo "[-] Listing files:"
+    ls -la
+    exit 1
+fi
+
 # Generate Random Secret Key
 echo "[+] Configuring Security..."
 if [ ! -f ".env" ]; then
