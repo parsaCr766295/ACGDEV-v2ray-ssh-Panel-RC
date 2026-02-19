@@ -12,7 +12,7 @@ services:
       - /proc:/host/proc:ro  # For system stats
     environment:
       - DATABASE_URI=sqlite:///./sql_app.db
-      - SECRET_KEY=changeme_in_production
+      - SECRET_KEY=${SECRET_KEY}
 
   frontend:
     image: node:20-alpine

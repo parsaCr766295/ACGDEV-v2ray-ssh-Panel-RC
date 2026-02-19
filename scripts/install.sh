@@ -52,9 +52,11 @@ fi
 
 # Generate Random Secret Key
 echo "[+] Configuring Security..."
-# Only replace if not already replaced (to avoid messing up existing configs on reinstall)
-if grep -q "changeme_in_production" docker-compose.yml; then
-    sed -i "s/changeme_in_production/$(openssl rand -hex 32)/g" docker-compose.yml
+if [ ! -f ".env" ]; then
+    echo "SECRET_KEY=$(openssl rand -hex 32)" > .env
+    echo "[+] .env file created with secure key."
+else
+    echo "[+] .env file already exists."
 fi
 
 # Start Services
