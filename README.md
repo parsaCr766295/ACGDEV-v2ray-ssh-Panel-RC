@@ -34,7 +34,7 @@
 
 ## 🚀 Installation
 
-### Automated Install (Recommended)
+### Automated Install (Recommended - Linux)
 Run the following command on your **Ubuntu 20.04+** server:
 
 ```bash
@@ -42,12 +42,24 @@ sudo apt update && sudo apt install -y curl
 curl -fsSL https://raw.githubusercontent.com/parsaCr766295/ACGDEV-v2ray-ssh-Panel-RC/main/scripts/install.sh | sudo bash
 ```
 
-### 🔄 Updating
-To update the panel to the latest version, run:
+### 🪟 Windows Server Installation
+Run the following command in **PowerShell (Administrator)**:
 
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/parsaCr766295/ACGDEV-v2ray-ssh-Panel-RC/main/scripts/install.ps1'))
+```
+
+### 🔄 Updating
+**Linux:**
 ```bash
 cd /opt/rocket-panel
 sudo bash scripts/update.sh
+```
+
+**Windows:**
+```powershell
+cd C:\RocketPanel
+.\scripts\update.ps1
 ```
 
 ### Manual Installation (Docker)
