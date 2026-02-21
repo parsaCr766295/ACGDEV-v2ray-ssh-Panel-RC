@@ -30,11 +30,14 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 }
 
 # Check Docker Daemon
-if (-not (docker info *>$null)) {
+$ErrorActionPreference = "SilentlyContinue"
+docker info | Out-Null
+if (-not $?) {
     Write-Color "[-] Error: Docker Daemon is not running." "Red"
     Write-Color "    Please start Docker Desktop and try again." "White"
     Exit 1
 }
+$ErrorActionPreference = "Stop"
 
 Write-Color "[+] Pulling latest changes..." "Yellow"
 git stash

@@ -89,10 +89,29 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 
 # 3. Check if Docker Daemon is Running
 Write-Color "[+] Checking Docker Service Status..." "Yellow"
-if (-not (docker info *>$null)) {
-    Write-Color "[-] Docker Daemon is NOT running." "Red"
-    Write-Color "[+] Attempting to start Docker Desktop..." "Yellow"
+
+function Test-Docker {
+    $ErrorActionPreference = "SilentlyContinue"
+    try {
+        docker info | Out-Null
+        return $?
+    } catch {
+        return $false
+    }
+}
+
+if (-not (Test-Docker)) {
+    Write-Color "[-] Docker Daemon is NOT responding or NOT running." "Red"
     
+    $dockerProcess = Get-Process "Docker Desktop" -ErrorAction SilentlyContinue
+    if ($dockerProcess) {
+        Write-Color "[!] Docker Desktop process is running but unresponsive. Restarting..." "Yellow"
+        Stop-Process -Name "Docker Desktop" -Force -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 2
+    } else {
+        Write-Color "[+] Docker Desktop is not running. Attempting to start..." "Yellow"
+    }
+
     $dockerPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
     if (Test-Path $dockerPath) {
         Start-Process $dockerPath
@@ -100,18 +119,22 @@ if (-not (docker info *>$null)) {
         
         # Wait loop
         $retries = 0
-        while ($retries -lt 20) {
+        while ($retries -lt 30) {
             Start-Sleep -Seconds 5
-            if (docker info *>$null) {
+            if (Test-Docker) {
                 Write-Color "[OK] Docker Daemon is now running!" "Green"
                 break
             }
-            Write-Host -NoNewline "."
+            Write-Host -NoNewline "." -ForegroundColor Yellow
             $retries++
         }
         
-        if (-not (docker info *>$null)) {
-             Write-Color "`n[-] Docker failed to start in time. Please start Docker Desktop manually and re-run this script." "Red"
+        if (-not (Test-Docker)) {
+             Write-Color "`n[-] Docker failed to start in time." "Red"
+             Write-Color "    Possible fixes:" "White"
+             Write-Color "    1. Open Docker Desktop manually from Start Menu." "White"
+             Write-Color "    2. Check if WSL2 is installed and updated (wsl --update)." "White"
+             Write-Color "    3. Restart your computer." "White"
              Exit 1
         }
     } else {
