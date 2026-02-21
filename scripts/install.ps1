@@ -117,7 +117,7 @@ if (-not (Test-Path "docker-compose.yml")) {
 # Generate Secret Key
 Write-Color "[+] Configuring Security..." "Yellow"
 if (-not (Test-Path ".env")) {
-    $secret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 64 | % {[char]$_})
+    $secret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 64 | ForEach-Object {[char]$_})
     "SECRET_KEY=$secret" | Out-File -Encoding utf8 .env
     Write-Color "[+] .env file created with secure key." "Green"
 } else {
