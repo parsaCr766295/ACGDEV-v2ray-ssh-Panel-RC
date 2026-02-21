@@ -87,7 +87,43 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     Write-Color "[OK] Docker is installed." "Green"
 }
 
-# 3. WSL Check (Recommended for Windows Server/10/11)
+# 3. Check if Docker Daemon is Running
+Write-Color "[+] Checking Docker Service Status..." "Yellow"
+if (-not (docker info *>$null)) {
+    Write-Color "[-] Docker Daemon is NOT running." "Red"
+    Write-Color "[+] Attempting to start Docker Desktop..." "Yellow"
+    
+    $dockerPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+    if (Test-Path $dockerPath) {
+        Start-Process $dockerPath
+        Write-Color "[+] Docker Desktop started. Waiting for initialization (this may take a minute)..." "Yellow"
+        
+        # Wait loop
+        $retries = 0
+        while ($retries -lt 20) {
+            Start-Sleep -Seconds 5
+            if (docker info *>$null) {
+                Write-Color "[OK] Docker Daemon is now running!" "Green"
+                break
+            }
+            Write-Host -NoNewline "."
+            $retries++
+        }
+        
+        if (-not (docker info *>$null)) {
+             Write-Color "`n[-] Docker failed to start in time. Please start Docker Desktop manually and re-run this script." "Red"
+             Exit 1
+        }
+    } else {
+        Write-Color "[-] Docker Desktop executable not found at default location." "Red"
+        Write-Color "    Please start Docker Desktop manually and re-run this script." "White"
+        Exit 1
+    }
+} else {
+    Write-Color "[OK] Docker Daemon is running." "Green"
+}
+
+# 4. WSL Check (Recommended for Windows Server/10/11)
 if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
     Write-Color "[!] Warning: WSL (Windows Subsystem for Linux) not found." "Yellow"
     Write-Color "    Rocket Panel runs best on WSL2 backend." "Yellow"

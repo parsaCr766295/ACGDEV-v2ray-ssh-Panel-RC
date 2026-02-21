@@ -29,6 +29,13 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     Exit 1
 }
 
+# Check Docker Daemon
+if (-not (docker info *>$null)) {
+    Write-Color "[-] Error: Docker Daemon is not running." "Red"
+    Write-Color "    Please start Docker Desktop and try again." "White"
+    Exit 1
+}
+
 Write-Color "[+] Pulling latest changes..." "Yellow"
 git stash
 git pull origin main
