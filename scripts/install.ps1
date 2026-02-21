@@ -45,22 +45,52 @@ if ($freeSpace -lt 5) {
 # Check Dependencies (Git & Docker)
 Write-Color "[+] Checking Dependencies..." "Yellow"
 
+$hasWinget = Get-Command winget -ErrorAction SilentlyContinue
+
+# 1. Git Check & Auto-Install
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     Write-Color "[-] Git is not installed." "Red"
-    Write-Color "    Please install Git for Windows: https://git-scm.com/download/win" "White"
-    Write-Color "    Or run: winget install Git.Git" "White"
-    Exit 1
+    if ($hasWinget) {
+        Write-Color "[+] Attempting to install Git via Winget..." "Yellow"
+        try {
+            winget install --id Git.Git -e --source winget --accept-source-agreements --accept-package-agreements --silent
+            Write-Color "[+] Git installed. Refreshing PATH..." "Green"
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        } catch {
+            Write-Color "[-] Failed to install Git automatically." "Red"
+        }
+    }
+    
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Color "[-] Git is required. Please install it manually: https://git-scm.com/download/win" "Red"
+        Exit 1
+    }
 } else {
     Write-Color "[OK] Git is installed." "Green"
 }
 
+# 2. Docker Check
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     Write-Color "[-] Docker is not installed." "Red"
-    Write-Color "    Please install Docker Desktop: https://www.docker.com/products/docker-desktop/" "White"
-    Write-Color "    Or run: winget install Docker.DockerDesktop" "White"
+    if ($hasWinget) {
+         Write-Color "[!] Install Docker Desktop? (This will require a restart) [Y/N]" "Yellow"
+         $response = Read-Host
+         if ($response -eq 'Y' -or $response -eq 'y') {
+             winget install --id Docker.DockerDesktop -e --source winget --accept-source-agreements --accept-package-agreements
+             Write-Color "[!] Docker installed. Please RESTART your server/PC and run this script again." "Red"
+             Exit 0
+         }
+    }
+    Write-Color "[-] Please install Docker Desktop manually: https://www.docker.com/products/docker-desktop/" "White"
     Exit 1
 } else {
     Write-Color "[OK] Docker is installed." "Green"
+}
+
+# 3. WSL Check (Recommended for Windows Server/10/11)
+if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
+    Write-Color "[!] Warning: WSL (Windows Subsystem for Linux) not found." "Yellow"
+    Write-Color "    Rocket Panel runs best on WSL2 backend." "Yellow"
 }
 
 # Installation Directory
