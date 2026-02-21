@@ -90,28 +90,18 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 # 3. Check if Docker Daemon is Running
 Write-Color "[+] Checking Docker Service Status..." "Yellow"
 
-function Test-Docker {
-    $ErrorActionPreference = "SilentlyContinue"
-    try {
-        docker info | Out-Null
-        return $?
-    } catch {
-        return $false
-    }
+$dockerRunning = $false
+try {
+    docker info | Out-Null
+    if ($LASTEXITCODE -eq 0) { $dockerRunning = $true }
+} catch {
+    $dockerRunning = $false
 }
 
-if (-not (Test-Docker)) {
-    Write-Color "[-] Docker Daemon is NOT responding or NOT running." "Red"
+if (-not $dockerRunning) {
+    Write-Color "[-] Docker Daemon is NOT running or not responding." "Red"
+    Write-Color "[+] Attempting to start Docker Desktop..." "Yellow"
     
-    $dockerProcess = Get-Process "Docker Desktop" -ErrorAction SilentlyContinue
-    if ($dockerProcess) {
-        Write-Color "[!] Docker Desktop process is running but unresponsive. Restarting..." "Yellow"
-        Stop-Process -Name "Docker Desktop" -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 2
-    } else {
-        Write-Color "[+] Docker Desktop is not running. Attempting to start..." "Yellow"
-    }
-
     $dockerPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
     if (Test-Path $dockerPath) {
         Start-Process $dockerPath
@@ -119,22 +109,22 @@ if (-not (Test-Docker)) {
         
         # Wait loop
         $retries = 0
-        while ($retries -lt 30) {
+        while ($retries -lt 20) {
             Start-Sleep -Seconds 5
-            if (Test-Docker) {
-                Write-Color "[OK] Docker Daemon is now running!" "Green"
-                break
-            }
-            Write-Host -NoNewline "." -ForegroundColor Yellow
+            try {
+                docker info | Out-Null
+                if ($LASTEXITCODE -eq 0) {
+                    $dockerRunning = $true
+                    Write-Color "`n[OK] Docker Daemon is now running!" "Green"
+                    break
+                }
+            } catch {}
+            Write-Host -NoNewline "."
             $retries++
         }
         
-        if (-not (Test-Docker)) {
-             Write-Color "`n[-] Docker failed to start in time." "Red"
-             Write-Color "    Possible fixes:" "White"
-             Write-Color "    1. Open Docker Desktop manually from Start Menu." "White"
-             Write-Color "    2. Check if WSL2 is installed and updated (wsl --update)." "White"
-             Write-Color "    3. Restart your computer." "White"
+        if (-not $dockerRunning) {
+             Write-Color "`n[-] Docker failed to start in time. Please start Docker Desktop manually and re-run this script." "Red"
              Exit 1
         }
     } else {

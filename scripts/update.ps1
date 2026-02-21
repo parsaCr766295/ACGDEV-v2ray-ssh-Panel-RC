@@ -30,14 +30,19 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
 }
 
 # Check Docker Daemon
-$ErrorActionPreference = "SilentlyContinue"
-docker info | Out-Null
-if (-not $?) {
+$dockerRunning = $false
+try {
+    docker info | Out-Null
+    if ($LASTEXITCODE -eq 0) { $dockerRunning = $true }
+} catch {
+    $dockerRunning = $false
+}
+
+if (-not $dockerRunning) {
     Write-Color "[-] Error: Docker Daemon is not running." "Red"
     Write-Color "    Please start Docker Desktop and try again." "White"
     Exit 1
 }
-$ErrorActionPreference = "Stop"
 
 Write-Color "[+] Pulling latest changes..." "Yellow"
 git stash
