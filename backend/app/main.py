@@ -1,6 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+import psutil
+import os
+
+# Configure psutil to use host proc if mounted
+if os.path.exists("/host/proc"):
+    psutil.PROCFS_PATH = "/host/proc"
 
 from app.api import api_router
 from app.core.config import settings

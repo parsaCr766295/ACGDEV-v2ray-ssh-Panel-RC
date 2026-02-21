@@ -2,15 +2,22 @@ services:
   backend:
     build: ./backend
     container_name: rocket_panel_backend
-    restart: always
+    restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      - /proc:/host/proc:ro  # For system stats
+      - /proc:/host/proc:ro  # Mount host /proc for system stats
     environment:
       - DATABASE_URI=sqlite:///./sql_app.db
       - SECRET_KEY=${SECRET_KEY}
+      - PROCFS_PATH=/host/proc  # Explicitly tell psutil where to look (though our code also checks path)
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/').read()\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   frontend:
     image: node:20-alpine
@@ -19,10 +26,16 @@ services:
     volumes:
       - ./frontend:/app
     ports:
-      - "3000:5173"  # Vite default port
+      - "3000:5173"  # Map host 3000 to Vite default 5173
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Fix hot reload in some environments
     command: sh -c "npm install && npm run dev -- --host"
+    stdin_open: true  # Interactive mode for Vite
+    tty: true
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+
 
 #  nginx:
 #    image: nginx:alpine
