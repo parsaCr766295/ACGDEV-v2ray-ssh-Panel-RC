@@ -142,6 +142,40 @@ if (-not (Get-Command wsl -ErrorAction SilentlyContinue)) {
     Write-Color "    Rocket Panel runs best on WSL2 backend." "Yellow"
 }
 
+# 5. Advanced Configuration
+Write-Color "`n[+] Configuring Advanced Settings..." "Yellow"
+
+# Firewall Configuration
+Write-Color "[+] Configuring Windows Firewall..." "Yellow"
+$ports = @(8000, 3000)
+foreach ($port in $ports) {
+    $ruleName = "RocketPanel-$port"
+    if (-not (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue)) {
+        try {
+            New-NetFirewallRule -DisplayName $ruleName -Direction Inbound -LocalPort $port -Protocol TCP -Action Allow | Out-Null
+            Write-Color "[OK] Port $port opened in Windows Firewall." "Green"
+        } catch {
+            Write-Color "[!] Could not open port $port (Firewall Error)." "Red"
+        }
+    } else {
+        Write-Color "[OK] Port $port already open." "Green"
+    }
+}
+
+# Create Desktop Shortcut
+$desktopPath = [Environment]::GetFolderPath("Desktop")
+$shortcutPath = "$desktopPath\Rocket Panel.lnk"
+try {
+    $WshShell = New-Object -comObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut($shortcutPath)
+    $Shortcut.TargetPath = "http://localhost:3000"
+    $Shortcut.Description = "Launch Rocket Panel 2026"
+    $Shortcut.Save()
+    Write-Color "[+] Desktop shortcut created." "Green"
+} catch {
+    Write-Color "[!] Could not create desktop shortcut." "Yellow"
+}
+
 # Installation Directory
 $installDir = "C:\RocketPanel"
 $repoUrl = "https://github.com/parsaCr766295/ACGDEV-v2ray-ssh-Panel-RC.git"
@@ -189,9 +223,18 @@ Write-Host ""
 Write-Color "==================================================" "Cyan"
 Write-Color "   Installation Complete! 🚀" "Green"
 Write-Color "==================================================" "Cyan"
-Write-Color "   Access your panel at: http://$publicIp`:3000" "Green"
+Write-Color "   Access your panel at:" "Green"
+Write-Color "   - Local:    http://localhost:3000" "Green"
+Write-Color "   - Network:  http://$publicIp`:3000" "Green"
+Write-Host ""
 Write-Color "   Default Admin:        admin" "Yellow"
 Write-Color "   Default Password:     admin" "Yellow"
 Write-Color "   [!] Please change your password immediately!" "Red"
+Write-Host ""
+Write-Color "   Support & Docs:       https://github.com/parsaCr766295/ACGDEV-v2ray-ssh-Panel-RC" "Cyan"
 Write-Color "==================================================" "Cyan"
 Write-Host ""
+
+Write-Color "[+] Opening panel in default browser..." "Yellow"
+Start-Sleep -Seconds 3
+Start-Process "http://localhost:3000"
