@@ -7,16 +7,16 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      # - /proc:/host/proc:ro  # Disabled: Causes issues on Windows Docker Desktop
+      # - /proc:/host/proc:ro  # Removed for Windows compatibility
     environment:
       - DATABASE_URI=sqlite:///./sql_app.db
       - SECRET_KEY=${SECRET_KEY}
-      # - PROCFS_PATH=/host/proc
+      # - PROCFS_PATH=/host/proc  # Removed for Windows compatibility
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/').read()\" || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/')\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
       start_period: 10s
 
   frontend:
